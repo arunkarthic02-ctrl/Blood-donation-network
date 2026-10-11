@@ -1,5 +1,10 @@
 HELP.md
 target/
+.env
+.env.*
+*.env
+*.log
+*error.txt
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
