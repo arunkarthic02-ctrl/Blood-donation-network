@@ -7,4 +7,5 @@ import java.util.List;
 public interface BloodRequestRepository extends JpaRepository<BloodRequest, Long> {
     List<BloodRequest> findByStatus(BloodRequest.RequestStatus status);
     List<BloodRequest> findByBloodGroup(String bloodGroup);
+    List<BloodRequest> findByPatientId(Long patientId);
 }

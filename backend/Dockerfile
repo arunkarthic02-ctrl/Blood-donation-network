@@ -14,11 +14,13 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Set non-root user for security
+# Create non-root user for security
 RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
 
-COPY --from=build /app/target/*.jar app.jar
+# Copy jar with spring ownership
+COPY --chown=spring:spring --from=build /app/target/*.jar app.jar
+
+USER spring:spring
 
 ENV PORT=8080
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"

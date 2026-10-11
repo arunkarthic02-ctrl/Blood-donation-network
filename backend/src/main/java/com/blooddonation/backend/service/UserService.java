@@ -1,7 +1,10 @@
 package com.blooddonation.backend.service;
 
+import com.blooddonation.backend.dto.UserResponseDto;
 import com.blooddonation.backend.dto.UserSignupRequest;
 import com.blooddonation.backend.entity.User;
+import com.blooddonation.backend.exception.EmailAlreadyRegisteredException;
+import com.blooddonation.backend.exception.InvalidCredentialsException;
 import com.blooddonation.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,9 +19,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User signup(UserSignupRequest request) {
+    public UserResponseDto signup(UserSignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+            throw new EmailAlreadyRegisteredException("Email already registered");
         }
 
         User user = new User();
@@ -28,14 +31,15 @@ public class UserService {
         user.setPhone(request.getPhone());
         user.setRole(User.Role.valueOf(request.getRole().toUpperCase()));
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return UserResponseDto.fromEntity(savedUser);
     }
 
-    public User login(String email, String password) {
+    public UserResponseDto login(String email, String password) {
         User user = userRepository.findByEmail(email);
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            throw new InvalidCredentialsException("Invalid email or password");
         }
-        return user;
+        return UserResponseDto.fromEntity(user);
     }
 }

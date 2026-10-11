@@ -3,6 +3,7 @@ package com.blooddonation.backend.service;
 import com.blooddonation.backend.dto.BloodRequestDto;
 import com.blooddonation.backend.entity.BloodRequest;
 import com.blooddonation.backend.entity.User;
+import com.blooddonation.backend.exception.ResourceNotFoundException;
 import com.blooddonation.backend.repository.BloodRequestRepository;
 import com.blooddonation.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class BloodRequestService {
 
     public BloodRequest createRequest(BloodRequestDto dto) {
         User patient = userRepository.findById(dto.getPatientId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id " + dto.getPatientId()));
 
         BloodRequest request = new BloodRequest();
         request.setPatient(patient);
@@ -38,5 +39,9 @@ public class BloodRequestService {
 
     public List<BloodRequest> getAllRequests() {
         return bloodRequestRepository.findAll();
+    }
+
+    public List<BloodRequest> getRequestsByPatientId(Long patientId) {
+        return bloodRequestRepository.findByPatientId(patientId);
     }
 }

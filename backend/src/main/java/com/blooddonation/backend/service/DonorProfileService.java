@@ -3,6 +3,7 @@ package com.blooddonation.backend.service;
 import com.blooddonation.backend.dto.DonorProfileRequest;
 import com.blooddonation.backend.entity.DonorProfile;
 import com.blooddonation.backend.entity.User;
+import com.blooddonation.backend.exception.ResourceNotFoundException;
 import com.blooddonation.backend.repository.DonorProfileRepository;
 import com.blooddonation.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,13 @@ public class DonorProfileService {
 
     public DonorProfile createProfile(DonorProfileRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + request.getUserId()));
 
-        DonorProfile profile = new DonorProfile();
-        profile.setUser(user);
+        DonorProfile profile = donorProfileRepository.findByUserId(request.getUserId());
+        if (profile == null) {
+            profile = new DonorProfile();
+            profile.setUser(user);
+        }
         profile.setBloodGroup(request.getBloodGroup());
         profile.setGender(request.getGender());
         profile.setLatitude(request.getLatitude());
@@ -30,5 +34,13 @@ public class DonorProfileService {
         profile.setIsAvailable(true);
 
         return donorProfileRepository.save(profile);
+    }
+
+    public DonorProfile getProfileByUserId(Long userId) {
+        DonorProfile profile = donorProfileRepository.findByUserId(userId);
+        if (profile == null) {
+            throw new ResourceNotFoundException("Donor profile not found for user id " + userId);
+        }
+        return profile;
     }
 }

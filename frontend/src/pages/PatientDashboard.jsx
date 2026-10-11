@@ -10,14 +10,15 @@ function PatientDashboard() {
   const [matches, setMatches] = useState({})
 
   useEffect(() => {
-    fetchMyRequests()
-  }, [])
+    if (user?.id) {
+      fetchMyRequests()
+    }
+  }, [user?.id])
 
   const fetchMyRequests = async () => {
     try {
-      const response = await api.get('/requests/create')
-      // Filter requests belonging to this patient (temporary client-side filter)
-      const myRequests = response.data.filter(r => r.patient.id === user.id)
+      const response = await api.get(`/requests/patient/${user.id}`)
+      const myRequests = response.data || []
       setRequests(myRequests)
 
       // Fetch matches for each request
@@ -56,7 +57,7 @@ function PatientDashboard() {
 
           <div>
             <h3>Total Matched Donors</h3>
-            <p>{Object.values(matches).reduce((sum, arr) => sum + arr.length, 0)} Donors</p>
+            <p>{Object.values(matches).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0)} Donors</p>
           </div>
         </div>
 

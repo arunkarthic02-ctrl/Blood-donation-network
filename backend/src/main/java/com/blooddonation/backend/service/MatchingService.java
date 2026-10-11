@@ -2,6 +2,7 @@ package com.blooddonation.backend.service;
 
 import com.blooddonation.backend.entity.BloodRequest;
 import com.blooddonation.backend.entity.DonorProfile;
+import com.blooddonation.backend.exception.ResourceNotFoundException;
 import com.blooddonation.backend.repository.BloodRequestRepository;
 import com.blooddonation.backend.repository.DonorProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class MatchingService {
 
     public List<Map<String, Object>> findMatches(Long requestId) {
         BloodRequest request = bloodRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Blood request not found with id " + requestId));
 
         String neededGroup = request.getBloodGroup();
         List<String> compatibleGroups = COMPATIBILITY.getOrDefault(neededGroup, new ArrayList<>());
@@ -86,7 +87,7 @@ public class MatchingService {
     public List<Map<String, Object>> findRequestsForDonor(Long userId) {
         DonorProfile donor = donorProfileRepository.findByUserId(userId);
         if (donor == null) {
-            throw new RuntimeException("Donor profile not found");
+            throw new ResourceNotFoundException("Donor profile not found for user id " + userId);
         }
 
         List<BloodRequest> pendingRequests = bloodRequestRepository.findByStatus(BloodRequest.RequestStatus.PENDING);
